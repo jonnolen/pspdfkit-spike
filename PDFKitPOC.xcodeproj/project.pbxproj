@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FC9550261635D136005CBE8F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550251635D136005CBE8F /* UIKit.framework */; };
+		FC9550261635D136005CBE8F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550251635D136005CBE8F /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		FC9550281635D136005CBE8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550271635D136005CBE8F /* Foundation.framework */; };
 		FC95502A1635D136005CBE8F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550291635D136005CBE8F /* CoreGraphics.framework */; };
 		FC9550301635D136005CBE8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FC95502E1635D136005CBE8F /* InfoPlist.strings */; };
@@ -23,6 +23,21 @@
 		FC95504C1635D136005CBE8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550271635D136005CBE8F /* Foundation.framework */; };
 		FC9550541635D136005CBE8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FC9550521635D136005CBE8F /* InfoPlist.strings */; };
 		FC9550571635D136005CBE8F /* PDFKitPOCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FC9550561635D136005CBE8F /* PDFKitPOCTests.m */; };
+		FC9550681635D1AB005CBE8F /* PSPDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550611635D1AB005CBE8F /* PSPDFKit.framework */; };
+		FC9550691635D1AB005CBE8F /* ACKNOWLEDGEMENTS in Resources */ = {isa = PBXBuildFile; fileRef = FC9550631635D1AB005CBE8F /* ACKNOWLEDGEMENTS */; };
+		FC95506A1635D1AB005CBE8F /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = FC9550641635D1AB005CBE8F /* LICENSE */; };
+		FC95506B1635D1AB005CBE8F /* PSPDFKit.bundle in Resources */ = {isa = PBXBuildFile; fileRef = FC9550651635D1AB005CBE8F /* PSPDFKit.bundle */; };
+		FC95506C1635D1AB005CBE8F /* PSPDFKit.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC9550661635D1AB005CBE8F /* PSPDFKit.xcconfig */; };
+		FC95506D1635D1AB005CBE8F /* VERSION in Resources */ = {isa = PBXBuildFile; fileRef = FC9550671635D1AB005CBE8F /* VERSION */; };
+		FC9550731635D2E9005CBE8F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC95506E1635D2E9005CBE8F /* AVFoundation.framework */; };
+		FC9550741635D2E9005CBE8F /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC95506F1635D2E9005CBE8F /* CoreText.framework */; };
+		FC9550751635D2E9005CBE8F /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550701635D2E9005CBE8F /* ImageIO.framework */; };
+		FC9550761635D2E9005CBE8F /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550711635D2E9005CBE8F /* MediaPlayer.framework */; };
+		FC9550791635D310005CBE8F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9550781635D310005CBE8F /* QuartzCore.framework */; };
+		FC95507B1635D326005CBE8F /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC95507A1635D326005CBE8F /* MessageUI.framework */; };
+		FC95507E1635D354005CBE8F /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC95507C1635D354005CBE8F /* CoreMedia.framework */; };
+		FC95507F1635D354005CBE8F /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FC95507D1635D354005CBE8F /* libz.dylib */; };
+		FC9550821635D732005CBE8F /* PDF32000_2008.pdf in Resources */ = {isa = PBXBuildFile; fileRef = FC9550811635D732005CBE8F /* PDF32000_2008.pdf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +73,21 @@
 		FC9550531635D136005CBE8F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FC9550551635D136005CBE8F /* PDFKitPOCTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PDFKitPOCTests.h; sourceTree = "<group>"; };
 		FC9550561635D136005CBE8F /* PDFKitPOCTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PDFKitPOCTests.m; sourceTree = "<group>"; };
+		FC9550611635D1AB005CBE8F /* PSPDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = PSPDFKit.framework; sourceTree = "<group>"; };
+		FC9550631635D1AB005CBE8F /* ACKNOWLEDGEMENTS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ACKNOWLEDGEMENTS; sourceTree = "<group>"; };
+		FC9550641635D1AB005CBE8F /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		FC9550651635D1AB005CBE8F /* PSPDFKit.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = PSPDFKit.bundle; sourceTree = "<group>"; };
+		FC9550661635D1AB005CBE8F /* PSPDFKit.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = PSPDFKit.xcconfig; sourceTree = "<group>"; };
+		FC9550671635D1AB005CBE8F /* VERSION */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VERSION; sourceTree = "<group>"; };
+		FC95506E1635D2E9005CBE8F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		FC95506F1635D2E9005CBE8F /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		FC9550701635D2E9005CBE8F /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		FC9550711635D2E9005CBE8F /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		FC9550781635D310005CBE8F /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		FC95507A1635D326005CBE8F /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		FC95507C1635D354005CBE8F /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		FC95507D1635D354005CBE8F /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		FC9550811635D732005CBE8F /* PDF32000_2008.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = PDF32000_2008.pdf; path = ../../../../Desktop/PDF32000_2008.pdf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,9 +95,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC9550741635D2E9005CBE8F /* CoreText.framework in Frameworks */,
+				FC9550791635D310005CBE8F /* QuartzCore.framework in Frameworks */,
+				FC95507B1635D326005CBE8F /* MessageUI.framework in Frameworks */,
+				FC95507F1635D354005CBE8F /* libz.dylib in Frameworks */,
+				FC9550751635D2E9005CBE8F /* ImageIO.framework in Frameworks */,
+				FC95507E1635D354005CBE8F /* CoreMedia.framework in Frameworks */,
+				FC9550761635D2E9005CBE8F /* MediaPlayer.framework in Frameworks */,
+				FC9550731635D2E9005CBE8F /* AVFoundation.framework in Frameworks */,
+				FC95502A1635D136005CBE8F /* CoreGraphics.framework in Frameworks */,
 				FC9550261635D136005CBE8F /* UIKit.framework in Frameworks */,
 				FC9550281635D136005CBE8F /* Foundation.framework in Frameworks */,
-				FC95502A1635D136005CBE8F /* CoreGraphics.framework in Frameworks */,
+				FC9550681635D1AB005CBE8F /* PSPDFKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +126,7 @@
 		FC9550161635D136005CBE8F = {
 			isa = PBXGroup;
 			children = (
+				FC9550801635D71A005CBE8F /* Resources */,
 				FC95502B1635D136005CBE8F /* PDFKitPOC */,
 				FC95504F1635D136005CBE8F /* PDFKitPOCTests */,
 				FC9550241635D136005CBE8F /* Frameworks */,
@@ -106,6 +146,15 @@
 		FC9550241635D136005CBE8F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FC95507C1635D354005CBE8F /* CoreMedia.framework */,
+				FC95507D1635D354005CBE8F /* libz.dylib */,
+				FC95507A1635D326005CBE8F /* MessageUI.framework */,
+				FC9550781635D310005CBE8F /* QuartzCore.framework */,
+				FC95506E1635D2E9005CBE8F /* AVFoundation.framework */,
+				FC95506F1635D2E9005CBE8F /* CoreText.framework */,
+				FC9550701635D2E9005CBE8F /* ImageIO.framework */,
+				FC9550711635D2E9005CBE8F /* MediaPlayer.framework */,
+				FC9550601635D1AB005CBE8F /* PSPDFKit.embeddedframework */,
 				FC9550251635D136005CBE8F /* UIKit.framework */,
 				FC9550271635D136005CBE8F /* Foundation.framework */,
 				FC9550291635D136005CBE8F /* CoreGraphics.framework */,
@@ -158,6 +207,36 @@
 				FC9550521635D136005CBE8F /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FC9550601635D1AB005CBE8F /* PSPDFKit.embeddedframework */ = {
+			isa = PBXGroup;
+			children = (
+				FC9550611635D1AB005CBE8F /* PSPDFKit.framework */,
+				FC9550621635D1AB005CBE8F /* Resources */,
+			);
+			path = PSPDFKit.embeddedframework;
+			sourceTree = "<group>";
+		};
+		FC9550621635D1AB005CBE8F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				FC9550631635D1AB005CBE8F /* ACKNOWLEDGEMENTS */,
+				FC9550641635D1AB005CBE8F /* LICENSE */,
+				FC9550651635D1AB005CBE8F /* PSPDFKit.bundle */,
+				FC9550661635D1AB005CBE8F /* PSPDFKit.xcconfig */,
+				FC9550671635D1AB005CBE8F /* VERSION */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		FC9550801635D71A005CBE8F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				FC9550811635D732005CBE8F /* PDF32000_2008.pdf */,
+			);
+			name = Resources;
+			path = PDFKitPOC;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -237,6 +316,12 @@
 				FC95503A1635D136005CBE8F /* Default@2x.png in Resources */,
 				FC95503C1635D136005CBE8F /* Default-568h@2x.png in Resources */,
 				FC95503F1635D136005CBE8F /* MainStoryboard.storyboard in Resources */,
+				FC9550691635D1AB005CBE8F /* ACKNOWLEDGEMENTS in Resources */,
+				FC95506A1635D1AB005CBE8F /* LICENSE in Resources */,
+				FC95506B1635D1AB005CBE8F /* PSPDFKit.bundle in Resources */,
+				FC95506C1635D1AB005CBE8F /* PSPDFKit.xcconfig in Resources */,
+				FC95506D1635D1AB005CBE8F /* VERSION in Resources */,
+				FC9550821635D732005CBE8F /* PDF32000_2008.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -378,10 +463,16 @@
 		FC95505B1635D136005CBE8F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/PSPDFKit.embeddedframework\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PDFKitPOC/PDFKitPOC-Prefix.pch";
 				INFOPLIST_FILE = "PDFKitPOC/PDFKitPOC-Info.plist";
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -389,10 +480,16 @@
 		FC95505C1635D136005CBE8F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/PSPDFKit.embeddedframework\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PDFKitPOC/PDFKitPOC-Prefix.pch";
 				INFOPLIST_FILE = "PDFKitPOC/PDFKitPOC-Info.plist";
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
