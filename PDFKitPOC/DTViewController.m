@@ -31,7 +31,9 @@
     PSPDFDocument *doc = [PSPDFDocument PDFDocumentWithURL:documentURL];
     [doc setDidCreateDocumentProviderBlock:^(PSPDFDocumentProvider *docProvider){
         NSLog(@"DID CREATE DOC PROVIDER: %@",docProvider.fileURL);
-        [docProvider.annotationParser.fileAnnotationProvider setAnnotationsPath:[[DTViewController Documents] stringByAppendingPathComponent:@"annotations_mf.kit"]];
+        docProvider.annotationParser.fileAnnotationProvider.annotationsPath = [[DTViewController Documents] stringByAppendingPathComponent:@"annotations_mf.kit"];
+        docProvider.annotationParser.annotationProviders = @[docProvider.annotationParser.fileAnnotationProvider];
+        [docProvider.annotationParser.fileAnnotationProvider tryLoadAnnotationsFromFileWithError:nil];
     }];
     doc.annotationSaveMode = PSPDFAnnotationSaveModeExternalFile;
     return [[PSPDFViewController alloc] initWithDocument:doc];
