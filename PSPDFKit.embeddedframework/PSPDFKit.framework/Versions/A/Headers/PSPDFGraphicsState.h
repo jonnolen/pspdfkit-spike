@@ -2,7 +2,7 @@
 //  PSPDFGraphicsState.h
 //  PSPDFKit
 //
-//  Copyright 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -21,6 +21,7 @@
     CGFloat horizontalScaling;
     CGFloat leading;
     CGFloat rise;
+    NSUInteger renderingMode;
 }
 
 @property (nonatomic, strong) PSPDFFontInfo *font;

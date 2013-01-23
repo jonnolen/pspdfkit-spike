@@ -2,7 +2,7 @@
 //  PSPDFLinkAnnotationView.h
 //  PSPDFKit
 //
-//  Copyright (c) 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -32,16 +32,26 @@
 /// Stroke width. Defaults to 1.
 @property (nonatomic, assign) CGFloat strokeWidth;
 
-/// Color to fill when the button is pressed. Defaults to gray.
-@property (nonatomic, strong) UIColor *pressedColor;
-
 /// Option to not mark small targets. (small = width/height < 6) Defaults to YES.
 @property (nonatomic, assign, getter=shouldHideSmallLinks) BOOL hideSmallLinks;
 
 /// Increases touch target by overspan pixel. Defaults to 15/15. Overspan is not visible.
 @property (nonatomic, assign) CGSize overspan;
 
-/// Called when the annotation fires. Can be used for subclassing.
+/// For performance reasons, rounded corners are disabled if too many link views are on a page.
+/// Defaults to YES.
+@property (nonatomic, assign) BOOL allowToDisableRoundedCorners;
+
+/// If set to YES, will save the last rounded corner setting, and restore if set to no.
+/// Defaults to NO.
+@property (nonatomic, assign) BOOL disableRoundedCorners;
+
+@end
+
+
+@interface PSPDFLinkAnnotationView (SubclassingHooks)
+
+/// Called when the annotation firess
 - (void)touchUp;
 
 @end

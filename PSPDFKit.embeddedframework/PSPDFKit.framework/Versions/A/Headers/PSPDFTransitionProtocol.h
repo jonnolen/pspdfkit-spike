@@ -2,7 +2,7 @@
 //  PSPDFTransitionProtocol.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -24,15 +24,15 @@
 // Associated pdfController. (unsafe_unretained because we observe KVO on this)
 @property (nonatomic, unsafe_unretained) PSPDFViewController *pdfController;
 
-// Associated scrollview. Might be nil if transition doesn't support zooming.
-@property (nonatomic, unsafe_unretained) PSPDFContentScrollView *scrollView;
+// Associated scroll view. Might be nil if transition doesn't support zooming.
+@property (nonatomic, weak) PSPDFContentScrollView *scrollView;
 
 @optional
 
 /// Return array of pageViews. (performance optimization)
 - (NSArray *)visiblePageViews;
 
-/// Customized content offset for PSPDFViewState
+/// Customized content offset for PSPDFViewState.
 - (CGPoint)compensatedContentOffset;
 
 @end

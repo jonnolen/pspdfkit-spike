@@ -2,7 +2,7 @@
 //  PSPDFSinglePageViewController.h
 //  PSPDFKit
 //
-//  Copyright (c) 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -28,8 +28,8 @@
 /// Clear internal state, prepare to be used again.
 - (void)prepareForReuse;
 
-/// attached pdfController.
-@property (nonatomic, ps_weak) PSPDFViewController *pdfController;
+/// Attached pdfController.
+@property (nonatomic, unsafe_unretained) PSPDFViewController *pdfController;
 
 /// internally used pageView.
 @property (nonatomic, strong, readonly) PSPDFPageView *pageView;
@@ -51,3 +51,6 @@
 - (void)layoutPage;
 
 @end
+
+// named view for better debugging
+@interface PSPDFSinglePageView : UIView @end

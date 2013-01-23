@@ -2,7 +2,7 @@
 //  PSPDFAnnotationController.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -35,6 +35,15 @@
 
 
 // Attached PDFController
-@property (nonatomic, ps_weak) PSPDFViewController *pdfController;
+@property (nonatomic, weak) PSPDFViewController *pdfController;
+
+@end
+
+
+@interface PSPDFAnnotationController (SubclassingHooks)
+
+/// Annotation factory for built-in types.
+/// Can be overridden, but usually reacting to the various annotation-delegate methods is enough.
+- (UIView <PSPDFAnnotationView>*)createAnnotationViewForAnnotation:(PSPDFAnnotation *)annotation frame:(CGRect)annotationRect;
 
 @end

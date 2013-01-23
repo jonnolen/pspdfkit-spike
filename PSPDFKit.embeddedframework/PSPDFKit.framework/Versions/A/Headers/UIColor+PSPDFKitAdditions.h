@@ -2,10 +2,15 @@
 //  UIColor+PSPDFKitAdditions.h
 //  PSPDFKit
 //
-//  Copyright (c) 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
+
+/// Returns a lighter and a darker color to make a gradient out of 'color'.
+/// variance has to be > 0 and <= 1.
+extern NSArray *PSPDFGradientColorsForColor(UIColor *color);
+extern NSArray *PSPDFGradientColorsForColorWithOptions(UIColor *color, CGFloat variance[2], BOOL subsituteBlackWithYellow);
 
 @interface UIColor (PSPDFKitAdditions)
 
@@ -33,13 +38,27 @@
 
 /// Property list support
 + (UIColor *)pspdf_colorFromPropertyRepresentation:(id)colorObject;
-- (id)pspdf_propertyRepresentation;
+- (NSString *)pspdf_stringFromColor;
 
-/// Derived colors
+/// Derived colors. Default delta is 0.1f.
 - (UIColor *)pspdf_lightenedColor;
+- (UIColor *)pspdf_lightenedColorWithDelta:(CGFloat)delta;
 - (UIColor *)pspdf_darkenedColor;
+- (UIColor *)pspdf_darkenedColorWithDelta:(CGFloat)delta;
 
 // Ensures the underlying color space of the UIColor is RGB.
 - (UIColor *)pspdf_colorInRGBColorSpace;
+
+// Calculates the total brightness of the current color.
+- (CGFloat)pspdf_brightness;
+
+// Returns a UIColor by scanning the string for a hex number and passing that to +[UIColor pspdf_colorWithRGBHex:]
+// Skips any leading whitespace and ignores any trailing characters
++ (UIColor *)pspdf_colorWithHexString:(NSString *)string;
+
++ (UIColor *)pspdf_colorWithRGBHex:(UInt32)hex allowTransparancy:(BOOL)allowTransparancy;
+
+// Component access.
+- (CGFloat)pspdf_alphaComponent;
 
 @end

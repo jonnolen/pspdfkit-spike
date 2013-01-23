@@ -2,7 +2,7 @@
 //  PSPDFOutlineParser.h
 //  PSPDFKit
 //
-//  Copyright 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -16,10 +16,10 @@
 - (id)initWithDocumentProvider:(PSPDFDocumentProvider *)documentProvider;
 
 /**
-    Returns a single outline element for the specified page.
+ Returns a single outline element for the specified page.
  
-    If exactPageOnly is set, the outline will only be returned if it's from the specific page.
-    else the last active set outline will be returned.
+ If exactPageOnly is set, the outline will only be returned if it's from the specific page.
+ Else the last active set outline will be returned.
 */
 - (PSPDFOutlineElement *)outlineElementForPage:(NSUInteger)page exactPageOnly:(BOOL)exactPageOnly;
 
@@ -35,7 +35,7 @@
 @property (nonatomic, assign, readonly, getter=isOutlineAvailable) BOOL outlineAvailable;
 
 /// Attached document provider.
-@property (nonatomic, ps_weak, readonly) PSPDFDocumentProvider *documentProvider;
+@property (nonatomic, weak, readonly) PSPDFDocumentProvider *documentProvider;
 
 /// Static helper, resolves named destination entries, returns dict with name -> page NSNumber
 + (NSDictionary *)resolveDestNames:(NSSet *)destNames documentRef:(CGPDFDocumentRef)documentRef;

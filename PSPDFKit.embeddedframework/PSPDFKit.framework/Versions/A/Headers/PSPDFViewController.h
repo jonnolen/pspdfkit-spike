@@ -2,7 +2,7 @@
 //  PSPDFViewController.h
 //  PSPDFKit
 //
-//  Copyright 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import <MessageUI/MessageUI.h>
@@ -15,15 +15,17 @@
 #import "PSPDFTransitionProtocol.h"
 #import "PSPDFWebViewController.h"
 #import "PSTCollectionView.h"
+#import "PSPDFBookmarkViewController.h"
+#import "PSPDFPatches.h"
 
 @protocol PSPDFViewControllerDelegate;
-@class PSPDFDocument, PSPDFScrollView, PSPDFScrobbleBar, PSPDFPageView, PSPDFHUDView, PSPDFGridView, PSPDFPageViewController, PSPDFSearchResult, PSPDFViewState, PSPDFBarButtonItem;
+@class PSPDFDocument, PSPDFScrollView, PSPDFScrobbleBar, PSPDFPageView, PSPDFHUDView, PSPDFGridView, PSPDFPageViewController, PSPDFSearchResult, PSPDFViewState, PSPDFBarButtonItem, PSPDFPageLabelView, PSPDFDocumentLabelView, PSPDFEmailBarButtonItem, PSPDFOpenInBarButtonItem, PSPDFCloseBarButtonItem, PSPDFMoreBarButtonItem, PSPDFBrightnessBarButtonItem, PSPDFBookmarkBarButtonItem, PSPDFViewModeBarButtonItem, PSPDFActivityBarButtonItem, PSPDFAnnotationBarButtonItem, PSPDFSearchBarButtonItem, PSPDFOutlineBarButtonItem, PSPDFPrintBarButtonItem, PSPDFAnnotationToolbar, PSPDFAnnotationController;
 
 /// Page Transition. Can be scrolling or something more fancy.
 typedef NS_ENUM(NSInteger, PSPDFPageTransition) {
     PSPDFPageScrollPerPageTransition,      // default mode for iOS4. Has one scrollView per page.
     PSPDFPageScrollContinuousTransition,   // Similar to UIWebView. Ignores PSPDFPageModeDouble.
-    PSPDFPageCurlTransition                // replaces pageCurlEnabled. iOS5+ feature.
+    PSPDFPageCurlTransition                // replaces pageCurlEnabled.
 };
 
 /// Current active view mode.
@@ -57,9 +59,10 @@ typedef NS_ENUM(NSInteger, PSPDFStatusBarStyleSetting) {
 };
 
 typedef NS_ENUM(NSInteger, PSPDFHUDViewMode) {
-    PSPDFHUDViewAlways,               /// Always show the HUD.
-    PSPDFHUDViewAutomatic,            /// Show HUD on touch and first/last page.
-    PSPDFHUDViewNever                 /// Never show the HUD.
+    PSPDFHUDViewAlways,                   /// Always show the HUD.
+    PSPDFHUDViewAutomatic,                /// Show HUD on touch and first/last page.
+    PSPDFHUDViewAutomaticNoFirstLastPage, /// Show HUD on touch.
+    PSPDFHUDViewNever                     /// Never show the HUD.
 };
 
 /// Default action for PDF link annotations.
@@ -82,9 +85,13 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 /**
  The main view controller to display PDFs. Can be displayed in fullscreen or embedded. Everything in PSPDFKit is based around PSPDFViewController. This is the class you want to override and customize.
  
- Make sure to correctly use viewController containment when adding this as a child view controller. If you override this class, ensure all UIViewController methods you're using do call super. (e.g. viewWillAppear). 
+ Make sure to correctly use viewController containment when adding this as a child view controller. If you override this class, ensure all UIViewController methods you're using do call super. (e.g. viewWillAppear).
+ 
+ For subclassing, please use overrideClassNames to register your custom subclasses. (Cast the key class to (id) to hide the copy warning - classes can be copied without a problem)
+ 
+ The best time for setting the properties is during initialization, in commonInitWithDocument:. Some properties require a call to reloadData if they are changed after the controller has been displayed. Do not set properties during a rotation phase or view appearance (e.g. viewWillAppear is bad, viewDidAppear is ok) since that could corrupt internal state.
 */
-@interface PSPDFViewController : PSPDFBaseViewController <PSPDFOutlineViewControllerDelegate, PSPDFPasswordViewDelegate, PSPDFTextSearchDelegate, PSPDFWebViewControllerDelegate, PSUICollectionViewDataSource, PSUICollectionViewDelegate, UIPopoverControllerDelegate, MFMailComposeViewControllerDelegate>
+@interface PSPDFViewController : PSPDFBaseViewController <PSPDFOutlineViewControllerDelegate, PSPDFPasswordViewDelegate, PSPDFTextSearchDelegate, PSPDFWebViewControllerDelegate, PSPDFBookmarkViewControllerDelegate, PSUICollectionViewDataSource, PSUICollectionViewDelegate, UIPopoverControllerDelegate, MFMailComposeViewControllerDelegate>
 
 /// @name Initialization
 
@@ -96,15 +103,11 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 
 /// @name Page Scrolling and Zooming
 
-/// Current page displayed, not landscape corrected. To change page, use scrollToPage.
-/// e.g. if you have 50 pages, you get 25/26 "double pages" when in double page mode.
-@property (nonatomic, assign, readonly) NSUInteger page;
+/// Set current page. Page starts at 0.
+/// Note: In PSPDFKit < 2.4, this was called "realPage".
+@property (nonatomic, assign) NSUInteger page;
 
-/// Current page displayed, landscape corrected. To change page, use scrollToPage.
-/// This represents the pages in the PDF document, starting at 0.
-@property (nonatomic, assign, readonly) NSUInteger realPage;
-
-/// Control currently displayed page. Page starts at 0.
+/// Set current page, optionally animated. Page starts at 0. Returns NO if page is invalid (e.g. out of bounds).
 - (BOOL)setPage:(NSUInteger)page animated:(BOOL)animated;
 
 /// Scroll to next page. Will potentiall advance two pages in dualPage mode.
@@ -112,6 +115,11 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 
 /// Scroll to previous page. Will potentiall decrease two pages in dualPage mode.
 - (BOOL)scrollToPreviousPageAnimated:(BOOL)animated;
+
+/// If we're in double page mode, this will return the current screen page, else it's equal to page.
+/// e.g. if you have 50 pages, you get 25/26 "double pages" when in double page mode.
+/// Note: In PSPDFKit < 2.4, this formerly was called was "page".
+@property (nonatomic, assign, readonly) NSUInteger screenPage;
 
 /// Scrolls to a specific rect on the current page. No effect if zoom is at 1.0.
 /// Note that rect are *screen* coordinates. If you want to use PDF coordinates, convert them via:
@@ -177,13 +185,13 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 - (BOOL)setHUDVisible:(BOOL)show animated:(BOOL)animated;
 
 /// Show the HUD. Respects HUDViewMode.
-- (BOOL)showControls;
+- (BOOL)showControlsAnimated:(BOOL)animated;
 /// Hide the HUD. Respects HUDViewMode.
-- (BOOL)hideControls;
+- (BOOL)hideControlsAnimated:(BOOL)animated;
 /// Hide the HUD (respects HUDViewMode) and additional elements like page selection.
-- (BOOL)hideControlsAndPageElements;
+- (BOOL)hideControlsAndPageElementsAnimated:(BOOL)animated;
 /// Toggles the HUD. Respects HUDViewMode.
-- (BOOL)toggleControls;
+- (BOOL)toggleControlsAnimated:(BOOL)animated;
 
 /// Enables default header toolbar. Only displayed if inside UINavigationController. Defaults to YES. Set before loading view.
 @property (nonatomic, assign, getter=isToolbarEnabled) BOOL toolbarEnabled;
@@ -192,8 +200,9 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 /// There's some more logic involved, e.g. is the default white statusbar not hidden on a HUD change.
 @property (nonatomic, assign, getter=isScrobbleBarEnabled) BOOL scrobbleBarEnabled;
 
-/// Enables/Disables the bottom document site position overlay. Defaults to YES. Animatable. Will be added to the hudView.
-@property (nonatomic, assign, getter=isPositionViewEnabled) BOOL positionViewEnabled;
+/// Enables/Disables the bottom document site position overlay.
+/// Defaults to YES. Animatable. Will be added to the HUDView.
+@property (nonatomic, assign, getter=isPageLabelEnabled) BOOL pageLabelEnabled;
 
 /// Enable/disable the top document label overlay. Defaults to YES on iPhone and NO on iPad.
 /// (On iPad, there's enough space to show the title in the navigationBar)
@@ -203,7 +212,7 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 @property (nonatomic, assign, getter=isRenderAnimationEnabled) BOOL renderAnimationEnabled;
 
 /// Content view. Use this if you want to add any always-visible UI elements.
-/// Created in viewDidLoad. contentView is behind hudView but always visible.
+/// Created in viewDidLoad. contentView is behind HUDView but always visible.
 /// ContentView does NOT overlay the navigationBar/statusBar, even if that one is transparent.
 @property (nonatomic, strong, readonly) PSPDFHUDView *contentView;
 
@@ -211,7 +220,7 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 /// @name Properties
 
 /// Register delegate to capture events, change properties.
-@property (nonatomic, ps_weak) IBOutlet id<PSPDFViewControllerDelegate> delegate;
+@property (nonatomic, weak) IBOutlet id<PSPDFViewControllerDelegate> delegate;
 
 /// Document that will be displayed.
 /// Note: has simple support to also accepts an NSString, the bundle path then will be used.
@@ -257,7 +266,7 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 @property (nonatomic, assign, getter=isViewLockEnabled) BOOL viewLockEnabled;
 
 /// Locks the current set rotation. Defaults to NO.
-/// If set to false, it invokes a attemptRotationToDeviceOrientation (iOS5 and above)
+/// If set to false, it invokes an attemptRotationToDeviceOrientation.
 @property (nonatomic, assign, getter=isRotationLockEnabled) BOOL rotationLockEnabled;
 
 /// Tap on begin/end of page scrolls to previous/next page. Defaults to YES.
@@ -270,26 +279,33 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 /// Can be useful if you're doing custom drawing on the PSPDFPageView.
 @property (nonatomic, assign) BOOL internalTapGesturesEnabled;
 
-
 /**
  Allows text selection. Defaults to YES.
 
- Note: This implies that the PDF file actually contains text glypths.
-       Sometimes text is represented via embedded images or vectors, in that case we can't select it.
-
- Also disable long press gesture recognizer on PSPDFScrollView if set to NO.
+ @warning This implies that the PDF file actually contains text glyphs.
+          Sometimes text is represented via embedded images or vectors, in that case we can't select it.
 
  Only available in PSPDFKit Annotate.
  */
 @property (nonatomic, assign, getter=isTextSelectionEnabled) BOOL textSelectionEnabled;
+
+/**
+ Allows image selection. Defaults to YES.
+ 
+ @warning Will only work if textSelectionEnabled is also set to YES.
+          This implies that the image is not in vector format.
+          Will not work on all images (feature is still experimental)
+
+ Only available in PSPDFKit Annotate.
+ */
+@property (nonatomic, assign, getter=isImageSelectionEnabled) BOOL imageSelectionEnabled;
 
 /// If YES, when a PDF that requires a password is set, a password dialog is shown.
 /// (The password dialog is of class PSPDFPasswordView; customize with overrideClassNames)
 /// Defaults to YES. If NO, an attempt to display the document anyway is made.
 @property (nonatomic, assign, getter=isPasswordDialogEnabled) BOOL passwordDialogEnabled;
 
-/// If embedded via iOS5 viewController containment, set this to true to allow this controller
-/// to access the parent navigationBar/navigationController to add custom buttons.
+/// Set this to true to allow this controller to access the parent navigationBar/navigationController to add custom buttons.
 /// Has no effect if toolbarEnabled is false or there's no parentViewController. Defaults to NO.
 @property (nonatomic, assign) BOOL useParentNavigationBar;
 
@@ -306,50 +322,55 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 
  You can now build your own toolbar with much less hassle.
  For example, to add those features under the "action" icon as a menu, use this:
- self.additionalRightBarButtonItems = @[self.printButtonItem, self.openInButtonItem, self.emailButtonItem];
+ self.additionalBarButtonItems = @[self.printButtonItem, self.openInButtonItem, self.emailButtonItem];
 
  You can change the button with using the subclassing system: (e.g. if you are looking for toolbarBackButton)
- overrideClassNames = @[[PSPDFCloseBarButtonItem class] : [MyCustomButtonSubclass class]];
+ overrideClassNames = @{(id)[PSPDFCloseBarButtonItem class] : [MyCustomButtonSubclass class]};
 */
 
 /// Default button in leftBarButtonItems if view is presented modally.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *closeButtonItem;
+@property (nonatomic, strong, readonly) PSPDFCloseBarButtonItem *closeButtonItem;
 
 // Default button items included by default in rightToolbarButtonItems
 
 /// Show Outline/Table Of Contents (if available in the PDF)
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *outlineButtonItem;
+@property (nonatomic, strong, readonly) PSPDFOutlineBarButtonItem *outlineButtonItem;
+
 /// Enable Search.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *searchButtonItem;
+@property (nonatomic, strong, readonly) PSPDFSearchBarButtonItem *searchButtonItem;
+
 /// Document/Thumbnail toggle.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *viewModeButtonItem;
+@property (nonatomic, strong, readonly) PSPDFViewModeBarButtonItem *viewModeButtonItem;
 
 
 // Default button items not included by default
 
 /// Print feature. Only displayed if document is allowed to be printed.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *printButtonItem;
+@property (nonatomic, strong, readonly) PSPDFPrintBarButtonItem *printButtonItem;
 
 /// Shows the Open In... iOS dialog. Only works with single-file pdf's.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *openInButtonItem;
+@property (nonatomic, strong, readonly) PSPDFOpenInBarButtonItem *openInButtonItem;
 
 /// Send current pdf via email. Only works with single-file/data pdf's.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *emailButtonItem;
+@property (nonatomic, strong, readonly) PSPDFEmailBarButtonItem *emailButtonItem;
 
 /// Show the annotation menu. Only available in PSPDFKit Annotate.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *annotationButtonItem;
+@property (nonatomic, strong, readonly) PSPDFAnnotationBarButtonItem *annotationButtonItem;
 
 /// Show the bookmarks menu.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *bookmarkButtonItem;
+@property (nonatomic, strong, readonly) PSPDFBookmarkBarButtonItem *bookmarkButtonItem;
 
 /// Show a button to control the brightness.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *brightnessButtonItem;
+@property (nonatomic, strong, readonly) PSPDFBrightnessBarButtonItem *brightnessButtonItem;
+
+/// Show a button to show UIActivityViewController (iOS6+).
+@property (nonatomic, strong, readonly) PSPDFActivityBarButtonItem *activityButtonItem;
 
 /// If added to the left/rightBarButtonItems, the position of the additionalRightBarButtonItems action button can be customized.
 /// By default this button is added to the rightBarButtonItems on the left.
 /// Button is only visible if [additionalRightBarButtonItems count] > 1.
 /// Do not add this to additionalRightBarButtonItems.
-@property (nonatomic, strong, readonly) PSPDFBarButtonItem *additionalActionsButtonItem;
+@property (nonatomic, strong, readonly) PSPDFMoreBarButtonItem *additionalActionsButtonItem;
 
 /**
  Bar button items displayed at the left of the toolbar
@@ -362,21 +383,22 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
  This problem only appears on the iPad in portrait mode.
  You can also use updateSettingsForRotation to adapt the toolbar for portrait/landscape mode.
  */
-@property (nonatomic, strong) NSArray *leftBarButtonItems;
+@property (nonatomic, copy) NSArray *leftBarButtonItems;
 
 /// Bar button items displayed at the right of the toolbar
 /// Must be UIBarButtonItem or PSPDFBarButtonItem instances
 /// Defaults to @[self.searchButtonItem, self.outlineButtonItem, self.viewModeButtonItem];
-@property (nonatomic, strong) NSArray *rightBarButtonItems;
+@property (nonatomic, copy) NSArray *rightBarButtonItems;
 
 /// Displayed at the left of the rightBarButtonItems inside an action sheet
 /// Must be PSPDFBarButtonItem instances
 /// If [additionalRightToolbarButtonItems count] == 1 then no action sheet is displayed
-@property (nonatomic, strong) NSArray *additionalRightBarButtonItems; // defaults to nil
+/// Note: This has been renamed in PSPDFKit 2.4 from "additionalRightBarButtonItems" since it's now controllable where the icon gets placed.
+@property (nonatomic, copy) NSArray *additionalBarButtonItems; // defaults to nil
 
 /// Add your custom UIBarButtonItems so that they won't be automatically enabed/disabed.
 /// Note: You really want to add yout custom close/back button there, else the user might get stuck!
-@property (nonatomic, strong) NSArray *barButtonItemsAlwaysEnabled;
+@property (nonatomic, copy) NSArray *barButtonItemsAlwaysEnabled;
 
 /// UIBarButtonItem doesn't support calculation of it's width, so we have to approximate.
 /// This allows you to change the minimum width if the heuristics fail.
@@ -385,6 +407,11 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 
 /// Allows to change the minimum width of the right toolbar. Set this within updateToolbars.
 @property (nonatomic, assign) CGFloat minRightToolbarWidth;
+
+/// Will use UIBarButtonItemStyleBordered instead of UIBarButtonItemStylePlain for toolbar items.
+///
+/// You have to call reloadData after changing this.
+@property (nonatomic, assign) BOOL useBorderedToolbarStyle;
 
 
 /// @name Appearance Properties
@@ -396,22 +423,24 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 @property (nonatomic, assign) PSPDFPageMode pageMode;
 
 /**
- Defines the page transition. Replaces pageCurlEnabled; allows more modes.
-
- Note about PSPDFPageCurlTransition:
- PageCurl needs iOS5 and above and will fall back to default scrolling on iOS4.
- PageCurl is more memory intensive; you might wanna disable this on an iPad1.
- (e.g. with using the PSPSDIsCrappyDevice() to check for modern devices)
+ Defines the page transition.
 
  If you change the property dynamically depending on the screen orientation, don't use
  willRotateToInterfaceOrientation but didRotateFromInterfaceOrientation,
  else the controller will get in an invalid state.
+
+ Note that childViewControllers get rotation events AFTER the parent view controller,
+ so if you're changing this from a parent viewController, for PSPDFKit the rotation hasn't been completed yet,
+ and your app will eventually crash. In that case, use a dispatch_async(dispatch_get_main_queue(), ^{ ... }); to set.
+ 
+ You might just wanna override updateSettingsForRotation: and set your properties there.
 */
 @property (nonatomic, assign) PSPDFPageTransition pageTransition;
 
-/// Change scrolling direction. defaults to horizontal scrolling. (PSPDFScrollDirectionHorizontal)
+/// Page scrolling direction. Defaults to PSPDFScrollDirectionHorizontal.
 /// Only relevant for scrolling page transitions.
-@property (nonatomic, assign) PSPDFScrollDirection pageScrolling;
+/// Deprecation Note: Previously to PSPDFKit 2.4, this was named "pageScrolling".
+@property (nonatomic, assign) PSPDFScrollDirection scrollDirection;
 
 /// Shows first document page alone. Not relevant in PSPDFPageModeSinge. Defaults to NO.
 @property (nonatomic, assign, getter=isDoublePageModeOnFirstPage) BOOL doublePageModeOnFirstPage;
@@ -429,7 +458,7 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 @property (nonatomic, assign, getter=isFitToWidthEnabled) BOOL fitToWidthEnabled;
 
 /// Defaults to NO. If this is set to YES, the page remembers its vertical position if fitToWidthEnabled is enabled. If NO, new pages will start at the page top position.
-@property (nonatomic, assign) BOOL fixedVerticalPositionForfitToWidthEnabledMode;
+@property (nonatomic, assign) BOOL fixedVerticalPositionForFitToWidthEnabledMode;
 
 /// PageCurl mode only: clips the page to its boundaries, not showing a pageCurl on empty background. Defaults to YES.
 /// Usually you want this, unless your document is variable sized.
@@ -457,15 +486,23 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 /// Set global toolbar tint color. Overrides defaults. Default is nil (depends on statusBarStyleSetting)
 @property (nonatomic, strong) UIColor *tintColor;
 
-/// Enable to add tinting to UIPopoverController. (using a custom UIPopoverView subclass)
-/// iOS5 and later. Defaults to YES. New since PSPDFKit 2.2.
+/// Enable to add tinting to UIPopoverController using a custom UIPopoverView subclass. Defaults to YES.
 @property (nonatomic, assign) BOOL shouldTintPopovers;
+
+/// Enable to allow tinting of PSPDFAlertView. Defaults to YES.
+@property (nonatomic, assign) BOOL shouldTintAlertView;
+- (UIColor *)alertViewTintColor; // Helper
 
 /// The navigationBar is animated. Check this to get the proper value, even if navigationBar.navigationBarHidden is not yet set (but will be in the animation block)
 @property (nonatomic, assign, getter=isNavigationBarHidden, readonly) BOOL navigationBarHidden;
 
 /// Annotations are faded in. Set global duration for this fade here. Defaults to 0.25f.
 @property (nonatomic, assign) CGFloat annotationAnimationDuration;
+
+/// If set to YES, a long-tap that ends on a page area that is not a text/image wil show a new menu to create annotations. Defaults to YES.
+/// If set to NO, there's no menu displayed and the loupe is simply hidden. Only works in PSPDFKit Annotate. New as of PSPDFKit 2.6.
+/// Menu can be intercepted and customized with the shouldShowMenuItems:atSuggestedTargetRect:forAnnotation:inRect:onPageView: delegate.
+@property (nonatomic, assign, getter=isCreateAnnotationMenuEnabled) BOOL createAnnotationMenuEnabled;
 
 
 /// @name Class Accessors
@@ -474,10 +511,11 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 /// Usually, using the delegates is a better idea to get the current page.
 - (PSPDFPageView *)pageViewForPage:(NSUInteger)page;
 
-/// Saves the popoverController if currently displayed.
+/// Saves the popoverController if currently displayed. (KVO compliant, like almost all properties)
 @property (nonatomic, strong) UIPopoverController *popoverController;
 
 /// Paging scroll view. (hosts scollviews for pdf)
+/// If you want to customize this, override reloadData and set the properties after calling super.
 @property (nonatomic, strong, readonly) UIScrollView *pagingScrollView;
 
 
@@ -514,14 +552,16 @@ typedef NS_ENUM(NSInteger, PSPDFPageRenderingMode) {
 - (void)presentModalViewController:(UIViewController *)controller embeddedInNavigationController:(BOOL)embedded withCloseButton:(BOOL)closeButton animated:(BOOL)animated;
 
 /// Show a modal view controller or a popover with automatically added close button on the left side.
-/// Use sender OR rect (both only needed for the popover)
+/// Use sender (UIBarButtonitem or UIView) OR rect in options (both only needed for the popover)
 extern NSString *const PSPDFPresentOptionRect;                          // target rect, if sender is nil for UIPopoverController
 extern NSString *const PSPDFPresentOptionPopoverContentSize;            // content size for UIPopoverController
 extern NSString *const PSPDFPresentOptionAllowedPopoverArrowDirections; // customize default arrow directions for popover.
 extern NSString *const PSPDFPresentOptionModalPresentationStyle;        // overrides UIPopoverController if set.
 extern NSString *const PSPDFPresentOptionAlwaysModal;                   // don't use UIPopoverController, even on iPad.
+extern NSString *const PSPDFPresentOptionAlwaysPopover;                 // show as popover, even on iPhone. (limited functionality!)
 extern NSString *const PSPDFPresentOptionPassthroughViews;              // customizes the click-through views.
-- (id)presentViewControllerModalOrPopover:(UIViewController *)controller embeddedInNavigationController:(BOOL)embedded withCloseButton:(BOOL)closeButton animated:(BOOL)animated sender:(UIBarButtonItem *)sender options:(NSDictionary *)options;
+extern NSString *const PSPDFPresentOptionWillDismissBlock;              // dispatch_block_t called when the popover is being dismissed.
+- (id)presentViewControllerModalOrPopover:(UIViewController *)controller embeddedInNavigationController:(BOOL)embedded withCloseButton:(BOOL)closeButton animated:(BOOL)animated sender:(id)sender options:(NSDictionary *)options;
 
 /// Return an NSNumber-array of currently visible page numbers.
 /// Note that this might return more numbers than actually visible if it's queried during a scroll animation.
@@ -539,8 +579,6 @@ extern NSString *const PSPDFPresentOptionPassthroughViews;              // custo
 /**
  Returns the topmost, active viewcontroller.
 
- This tries to be smart and even works in weird, non-default situations where viewControllers are embedded w/o iOS5 child controller embedding.
-
  If you get effects like the email controller not appearing at all, override this and return the controller where modal controllers can be pushed onto.
  (Try "return self" first)
 
@@ -553,10 +591,21 @@ extern NSString *const PSPDFPresentOptionPassthroughViews;              // custo
 
 @interface PSPDFViewController (SubclassingHooks)
 
-/// Use this to use specific subclass names instead of the default PSPDF* classes.
-/// e.g. add an entry of [PSPDFPageView class] / [MyCustomPageView class] as key/value pair to use the custom subclass. (MyCustomPageView must be a subclass of PSPDFPageView)
-/// Throws an exception if the overriding class is not a subclass of the overridden class.
-@property (nonatomic, strong) NSDictionary *overrideClassNames;
+/// Override this initializer to allow all use cases (storyboard loading, etc)
+- (void)commonInitWithDocument:(PSPDFDocument *)document;
+
+/**
+ Use this to use specific subclasses instead of the default PSPDF* classes.
+ 
+ This works across the whole framework and allows you to subclass all usages of a class. For example add an entry of [PSPDFPageView class] / [MyCustomPageView class] as key/value pair to use the custom subclass. (MyCustomPageView must be a subclass of PSPDFPageView)
+
+ Throws an exception if the overriding class is not a subclass of the overridden class.
+ 
+ Hide the warning "Incompatible pointer types sending 'Class' to parameter of type 'id<NSCopying>' " with casting class to (id). It's perfectly safe to do so. Alternatively you can also use NSStrings.
+ 
+ e.g.: overrideClassNames = @{(id)[PSPDFCloseBarButtonItem class] : [MyCustomButtonSubclass class]};
+ */
+@property (nonatomic, copy) NSDictionary *overrideClassNames;
 
 /// Override if you're changing the toolbar to your own.
 /// The toolbar is only displayed, if PSPDFViewController is inside a UINavigationController.
@@ -571,8 +620,11 @@ extern NSString *const PSPDFPresentOptionPassthroughViews;              // custo
 
 /// Called in viewWillAppear with the initial rotation and then in willRotateToInterfaceOrientation.
 /// Might be called multiple times during a rotation, so any code in there should be fast.
-/// The default implementation for this is empty.
+/// The default implementation calls the block set in setUpdateSettingsForRotationBlock.
 - (void)updateSettingsForRotation:(UIInterfaceOrientation)toInterfaceOrientation;
+
+/// Convenience method for updateSettingsForRotation:
+- (void)setUpdateSettingsForRotationBlock:(void (^)(PSPDFViewController *pdfController, UIInterfaceOrientation toInterfaceOrientation))block;
 
 /// Manually return the desired UI status bar style (default is evaluated via app status bar style)
 - (UIStatusBarStyle)statusBarStyle;
@@ -590,16 +642,43 @@ extern NSString *const PSPDFPresentOptionPassthroughViews;              // custo
 @property (nonatomic, strong, readonly) UIViewController<PSPDFTransitionProtocol> *pageTransitionController;
 
 // Return rect of the content view area excluding translucent toolbar/statusbar.
+// This will even return the correctly compensated statusBar if that one is currently not visible.
 - (CGRect)contentRect;
+
+/// Will return the annotation bar if currently one is visible.
+- (PSPDFAnnotationToolbar *)visibleAnnotationToolbar;
 
 /// Default saves annotations when app goes to background.
 /// Is registered on init/deregistered on dealloc.
 /// Only tries to saves document if view is visible.
 - (void)applicationDidEnterBackground:(NSNotification *)notification;
 
+/// Document page label view.
+@property (nonatomic, strong) PSPDFPageLabelView *pageLabel;
+
+/// Document title label view. (default iPhone only)
+@property (nonatomic, strong) PSPDFDocumentLabelView *documentLabel;
+
+// Allows access to the annotation cache.
+@property (nonatomic, strong, readonly) PSPDFAnnotationController *annotationController;
+
 @end
 
 // Allows better guessing of the status bar style.
 @protocol PSPDFStatusBarStyleHint <NSObject>
 - (UIStatusBarStyle)preferredStatusBarStyle;
+@end
+
+@interface PSPDFViewController (PSPDFDeprected)
+
+@property (nonatomic, assign, getter=isPositionViewEnabled) BOOL positionViewEnabled __attribute__ ((deprecated("Use pageLabelEnabled instead")));
+/// As of PSPDFKit 2.4, page now returns the actual page value, and the old "page" has been replaced with screenPage.
+@property (nonatomic, assign, readonly) NSUInteger realPage __attribute__ ((deprecated("Use page instead")));
+@property (nonatomic, copy) NSArray *additionalRightBarButtonItems __attribute__ ((deprecated("Use additionalBarButtonItems instead")));
+@property (nonatomic, assign) PSPDFScrollDirection pageScrolling __attribute__ ((deprecated("Use scrollDirection instead")));
+- (BOOL)showControls __attribute__ ((deprecated("Use showControlsAnimated: instead")));
+- (BOOL)hideControls __attribute__ ((deprecated("Use hideControlsAnimated: instead")));;
+- (BOOL)hideControlsAndPageElements __attribute__ ((deprecated("Use hideControlsAndPageElementsAnimated: instead")));;
+- (BOOL)toggleControls __attribute__ ((deprecated("Use toggleControlsAnimated: instead")));;
+
 @end

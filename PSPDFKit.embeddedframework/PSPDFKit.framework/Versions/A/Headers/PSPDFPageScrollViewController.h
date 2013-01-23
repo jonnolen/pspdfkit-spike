@@ -2,7 +2,7 @@
 //  PSPDFPageScrollViewController.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFBaseViewController.h"
@@ -10,7 +10,9 @@
 #import "PSPDFTransitionProtocol.h"
 #import "PSPDFViewController.h"
 
-@class PSPDFPageView, PSPDFPagingScrollView;
+@interface PSPDFPagingScrollView : UIScrollView @end
+
+@class PSPDFPageView;
 
 /// Basic magazine-like side scrolling.
 @interface PSPDFPageScrollViewController : PSPDFBaseViewController <PSPDFTransitionProtocol, UIScrollViewDelegate>
@@ -22,7 +24,7 @@
 @property (nonatomic, unsafe_unretained) PSPDFViewController *pdfController;
 
 /// Main view.
-@property (nonatomic, strong, readonly) PSPDFPagingScrollView *pagingScrollView;
+@property (nonatomic, strong, readonly) UIScrollView *pagingScrollView;
 
 /// Page padding width between single/double pages.
 @property (nonatomic, assign) CGFloat pagePadding;
@@ -45,7 +47,7 @@
 // Rotation Helper.
 @property (nonatomic, assign) NSUInteger targetPageAfterRotation;
 
-@end
+// Will configure the PSPDFScrollView and set the properties on it.
+- (void)configureScrollView:(PSPDFScrollView *)page forPageIndex:(NSUInteger)pageIndex;
 
-// Internally used scrollview.
-@interface PSPDFPagingScrollView : UIScrollView @end
+@end

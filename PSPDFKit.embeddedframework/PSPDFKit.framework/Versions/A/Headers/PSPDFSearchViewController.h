@@ -2,7 +2,7 @@
 //  PSPDFSearchViewController.h
 //  PSPDFKit
 //
-//  Copyright 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -10,14 +10,15 @@
 #import "PSPDFTextSearch.h"
 #import "PSPDFCache.h"
 #import "PSPDFViewController.h"
+#import "PSPDFExtendedPopoverController.h"
 
 @class PSPDFDocument, PSPDFViewController, PSPDFSearchResult;
 
 typedef NS_ENUM(NSInteger, PSPDFSearchStatus) {
-    PSPDFSearchIdle,
-    PSPDFSearchActive,
-    PSPDFSearchFinished,
-    PSPDFSearchCancelled
+    PSPDFSearchStatusIdle,
+    PSPDFSearchStatusActive,
+    PSPDFSearchStatusFinished,
+    PSPDFSearchStatusCancelled
 };
 
 // Default value is 2. You might wanna change this for asian languages.
@@ -25,7 +26,7 @@ typedef NS_ENUM(NSInteger, PSPDFSearchStatus) {
 extern NSUInteger kPSPDFMinimumSearchLength;
 
 /// pdf search controller.
-@interface PSPDFSearchViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate, PSPDFCacheDelegate, PSPDFTextSearchDelegate, PSPDFStatusBarStyleHint>
+@interface PSPDFSearchViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate, PSPDFCacheDelegate, PSPDFTextSearchDelegate, PSPDFStatusBarStyleHint, PSPDFPopoverControllerDismissable>
 
 /// initializes controller.
 - (id)initWithDocument:(PSPDFDocument *)document pdfController:(PSPDFViewController *)pdfController;
@@ -50,8 +51,18 @@ extern NSUInteger kPSPDFMinimumSearchLength;
 /// Defaults to 600. A too high number will be slow.
 @property (nonatomic, assign) NSUInteger maximumNumberOfSearchResultsDisplayed;
 
+/// Set to enable searching on the visible pages, then all. Was default until PSPDFKit 2.4.1. Defaults to NO.
+/// If not set, the natural page order is searched.
+@property (nonatomic, assign) BOOL searchVisiblePagesFirst;
+
+/// Internally used textSearch (is a copy of the textSearch class in document)
+@property (nonatomic, strong, readonly) PSPDFTextSearch *textSearch;
+
+/// Attached pdfController.
+@property (nonatomic, weak, readonly) PSPDFViewController *pdfController;
+
 // Updates the search result cell. Can be subclassed.
-// To customize the label search the subvies for the PSPDFAttributedLabel class.
+// To customize the label search the subviews for the PSPDFAttributedLabel class.
 - (void)updateResultCell:(UITableViewCell *)cell searchResult:(PSPDFSearchResult *)searchResult;
 
 @end

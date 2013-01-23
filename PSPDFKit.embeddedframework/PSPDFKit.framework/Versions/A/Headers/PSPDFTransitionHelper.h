@@ -2,7 +2,7 @@
 //  PSPDFTransitionViewController.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -30,7 +30,7 @@
 /// Create page controller using the master pdf controller.
 - (id)initWithDelegate:(UIViewController<PSPDFTransitionHelperDelegate> *)delegate;
 
-@property (nonatomic, ps_weak, readonly) UIViewController<PSPDFTransitionHelperDelegate> *delegate;
+@property (nonatomic, weak, readonly) UIViewController<PSPDFTransitionHelperDelegate> *delegate;
 
 /// Set new page.
 @property (nonatomic, assign) NSUInteger page;

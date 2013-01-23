@@ -2,7 +2,7 @@
 //  PSPDFCache.h
 //  PSPDFKit
 //
-//  Copyright 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -43,7 +43,7 @@ typedef NS_ENUM(NSInteger, PSPDFSize) {
 @interface PSPDFCache : NSObject <NSCacheDelegate> 
 
 /// The cache is a singleton.
-+ (PSPDFCache *)sharedCache;
++ (instancetype)sharedCache;
 
 /// Check if all pages of a document are cached.
 - (BOOL)isDocumentCached:(PSPDFDocument *)document size:(PSPDFSize)size;
@@ -57,8 +57,11 @@ typedef NS_ENUM(NSInteger, PSPDFSize) {
 /// Returns cached image of document. preload decompresses the image in the background.
 - (UIImage *)cachedImageForDocument:(PSPDFDocument *)document page:(NSUInteger)page size:(PSPDFSize)size preload:(BOOL)preload;
 
-/// Renders image of a page for specified size.
+/// Renders image of a page for specified size. Will not cache the image.
 - (UIImage *)renderImageForDocument:(PSPDFDocument *)document page:(NSUInteger)page size:(PSPDFSize)size PDFPage:(CGPDFPageRef)pdfPage;
+
+/// Creates image and will add that to the cache.
+- (UIImage *)renderAndCacheImageForDocument:(PSPDFDocument *)document page:(NSUInteger)page size:(PSPDFSize)size error:(NSError **)error;
 
 // TODO was used in tiling view
 /// save native rendered image, then call delegate.
@@ -96,7 +99,8 @@ typedef NS_ENUM(NSInteger, PSPDFSize) {
 - (BOOL)resumeCachingForService:(id)service;
 
 /// Clear cache for a specific document, optionally also deletes referenced document files. Operation is synchronous.
-/// Will also delete all metadata in document.cacheDirectory
+/// Will also delete all metadata in document.cacheDirectory.
+/// Can only delete document if document uses a file-based URL.
 - (BOOL)removeCacheForDocument:(PSPDFDocument *)document deleteDocument:(BOOL)deleteDocument error:(NSError **)error;
 
 /// Clear whole (disk) cache directory. May lock until related async tasks are finished. Can be called from any thread.
@@ -142,6 +146,19 @@ typedef NS_ENUM(NSInteger, PSPDFSize) {
 
 /// Cache files are saved in a subdirectory of NSCachesDirectory. Defaults to "PSPDFKit".
 @property (nonatomic, copy) NSString *cacheDirectory;
+
+/// Calculates the current cache disk usage.
+- (unsigned long long int)currentDiskUsage;
+
+/// @name Encryption/Decryption Handlers
+
+/// Decrypt data from the path. PSPDFKit Annotate feature.
+/// If set to nil, the default implementation will be used.
+@property (atomic, copy) NSData *(^decryptFromPathBlock)(PSPDFDocument *document, NSString *path);
+
+/// Encrypt mutable data. PSPDFKit Annotate feature.
+/// If set to nil, the default implementation will be used.
+@property (atomic, copy) void (^encryptDataBlock)(PSPDFDocument *document, NSMutableData *data);
 
 @end
 

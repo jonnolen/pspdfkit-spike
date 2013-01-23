@@ -2,7 +2,7 @@
 //  PSPDFLongPressGestureRecognizer.h
 //  PSPDFKit
 //
-//  Copyright 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -13,6 +13,7 @@
 
 @protocol PSPDFLongPressGestureRecognizerDelegate <UIGestureRecognizerDelegate>
 
+/// Allows immediate handling of the touchesBegan event.
 - (BOOL)pressRecognizerShouldHandlePressImmediately:(PSPDFLongPressGestureRecognizer *)recognizer;
 
 @end

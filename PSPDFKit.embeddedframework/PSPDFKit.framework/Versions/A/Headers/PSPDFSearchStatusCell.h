@@ -2,7 +2,7 @@
 //  PSPDFSearchStatusCell.h
 //  PSPDFKit
 //
-//  Copyright (c) 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -15,6 +15,6 @@
 - (void)updateCellWithSearchStatus:(PSPDFSearchStatus)searchStatus results:(NSUInteger)results;
 
 /// Spinner that is displayed while search is in progress
-@property (nonatomic, ps_weak, readonly) UIActivityIndicatorView *spinner;
+@property (nonatomic, weak, readonly) UIActivityIndicatorView *spinner;
 
 @end

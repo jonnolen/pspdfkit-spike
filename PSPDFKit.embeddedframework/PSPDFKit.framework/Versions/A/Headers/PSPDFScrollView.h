@@ -2,7 +2,7 @@
 //  PSPDFScrollView.h
 //  PSPDFKit
 //
-//  Copyright 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -18,11 +18,22 @@ typedef NS_ENUM(NSInteger, PSPDFShadowStyle) {
 
 /**
  ScrollView that manages one or multiple PSPDFView's.
+
  Depending on the pageTransition, either every PSPDFPageView is embedded in a PSPDFScrollView,
  or there is one global PSPDFScrollView for all PSPDFPageView's.
  This is also the center for all the gesture recognizers. Subclass to customize behavior (e.g. override gestureRecognizerShouldBegin)
+ 
+ If you manually zoom/change the contentOffset, you must use the methods with animation extension.
+ (You don't have to animate, but those are overridden by PSPDFKit to properly inform the PSPDFPageViews to re-render. You can also use the default UIScrollView properties and manually call updateRenderView on each visible PSPDFPageView)
+ 
+- (void)setZoomScale:(float)scale animated:(BOOL)animated;
+- (void)zoomToRect:(CGRect)rect animated:(BOOL)animated;
+- (void)setContentOffset:(CGPoint)contentOffset animated:(BOOL)animated;
  */
 @interface PSPDFScrollView : UIScrollView <UIScrollViewDelegate, PSPDFLongPressGestureRecognizerDelegate>
+
+// Designated initializer.
+- (id)initWithFrame:(CGRect)frame;
 
 /// Display specific document with specified page.
 - (void)displayDocument:(PSPDFDocument *)document withPage:(NSUInteger)page;
@@ -34,10 +45,10 @@ typedef NS_ENUM(NSInteger, PSPDFShadowStyle) {
 @property (nonatomic, assign) NSUInteger page;
 
 /// Associated document.
-@property (nonatomic, strong, readonly) PSPDFDocument *document;
+@property (atomic, strong, readonly) PSPDFDocument *document;
 
 /// Weak reference to parent pdfController.
-@property (nonatomic, ps_weak) PSPDFViewController *pdfController;
+@property (atomic, weak) PSPDFViewController *pdfController;
 
 /// Left page. Always set. Not used if pageCurlEnabled.
 @property (nonatomic, strong, readonly) PSPDFPageView *leftPage;
@@ -86,18 +97,18 @@ typedef NS_ENUM(NSInteger, PSPDFShadowStyle) {
 - (void)setCurrentTouchEventAsProcessed;
 
 /**
-    Hit-Testing
+ Hit-Testing
  
-    PSPDFKit has a UITapGestureRecognizer to detects taps. There are several different actions called, if one succeeds further processing will be stopped.
+ PSPDFKit has a UITapGestureRecognizer to detects taps. There are several different actions called, if one succeeds further processing will be stopped.
  
-    First, we check if we hit a PSPDFLinkAnnotationView and invoke the delegates and default action if found.
+ First, we check if we hit a PSPDFLinkAnnotationView and invoke the delegates and default action if found.
  
-    Next, we check if there's text selection and discard if.
-    Then, touches are relayed to all visible PSPDFPageView's and singleTapped: is called. If one page reports that the touch has been processed; the loop is stopped.
+ Next, we check if there's text selection and discard if.
+ Then, touches are relayed to all visible PSPDFPageView's and singleTapped: is called. If one page reports that the touch has been processed; the loop is stopped.
  
-    Next, the didTapOnPageView:atPoint: delegate is called if the touch still hasn't been processed.
+ Next, the didTapOnPageView:atPoint: delegate is called if the touch still hasn't been processed.
  
-    Lastly, if even the delegate returned NO, we look if isScrollOnTapPageEndEnabled and scroll to the next/previous page if the border is near enough; or just toggle the HUD (if that is allowed)
+ Lastly, if even the delegate returned NO, we look if isScrollOnTapPageEndEnabled and scroll to the next/previous page if the border is near enough; or just toggle the HUD (if that is allowed)
  */
 - (void)singleTapped:(UITapGestureRecognizer *)recognizer;
 - (void)doubleTapped:(UITapGestureRecognizer *)recognizer;

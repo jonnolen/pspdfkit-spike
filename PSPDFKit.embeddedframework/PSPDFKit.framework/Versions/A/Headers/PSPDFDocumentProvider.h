@@ -2,12 +2,12 @@
 //  PSPDFDocumentProvider.h
 //  PSPDFKit
 //
-//  Copyright (c) 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
 
-@class PSPDFTextSearch, PSPDFTextParser, PSPDFDocumentParser, PSPDFOutlineParser, PSPDFAnnotationParser, PSPDFDocumentProvider, PSPDFLabelParser, PSPDFDocument;
+@class PSPDFTextSearch, PSPDFTextParser, PSPDFDocumentParser, PSPDFOutlineParser, PSPDFAnnotationParser, PSPDFDocumentProvider, PSPDFLabelParser, PSPDFDocument, PSPDFPageInfo;
 
 /// Delegate for writing annotations. 
 @protocol PSPDFDocumentProviderDelegate <NSObject>
@@ -15,6 +15,7 @@
 @optional
 
 /// Called before we append data to a PDF. Return NO to stop writing annotations.
+/// Defaults to YES if not implemented, and will set a new NSData object.
 - (BOOL)documentProvider:(PSPDFDocumentProvider *)documentProvider shouldAppendData:(NSData *)data;
 
 // Called after the write is completed.
@@ -50,11 +51,14 @@ extern NSString *PSPDFKCloseCachedDocumentRefNotification;
 /// Returns a NSData representation, memory-maps files, tries to copy a CGDataProviderRef
 - (NSData *)dataRepresentationWithError:(NSError **)error;
 
+/// Returns the fileSize of this documentProvider.
+- (unsigned long long)fileSize;
+
 /// Weak-linked parent document.
-@property (nonatomic, ps_weak, readonly) PSPDFDocument *document;
+@property (nonatomic, weak, readonly) PSPDFDocument *document;
 
 /// Delegate for writing annotations. Is set to PSPDFDocument per default.
-@property (nonatomic, ps_weak) id<PSPDFDocumentProviderDelegate> delegate;
+@property (nonatomic, weak) id<PSPDFDocumentProviderDelegate> delegate;
 
 /// Access the CGPDFDocumentRef and locks the internal document. 
 ///
@@ -72,8 +76,10 @@ extern NSString *PSPDFKCloseCachedDocumentRefNotification;
 /// Iterate over all CGPDFPageRef pages. pageNumber starts at 1.
 - (void)iterateOverPageRef:(void(^)(PSPDFDocumentProvider *provider, CGPDFDocumentRef documentRef, CGPDFPageRef pageRef, NSUInteger page))pageRefBlock;
 
+
 /// Requests a page for the current loaded document. Needs to be returned in releasePageRef.
 /// pageNumber starts at 1.
+- (CGPDFPageRef)requestPageRefForPageNumber:(NSUInteger)page error:(NSError **)error;
 - (CGPDFPageRef)requestPageRefForPageNumber:(NSUInteger)page;
 
 /// Releases a page reference. 
@@ -83,8 +89,31 @@ extern NSString *PSPDFKCloseCachedDocumentRefNotification;
 /// This force-clears the cache.
 - (void)flushDocumentReference;
 
-/// Number of pages in the PDF. Nil if source is invalid.
+/// Cached rotation and aspect ratio data for specific page. Page starts at 0.
+- (PSPDFPageInfo *)pageInfoForPage:(NSUInteger)page;
+
+/// Number of pages in the PDF. Nil if source is invalid. Will be filtered by pageRange.
 @property (nonatomic, assign, readonly) NSUInteger pageCount;
+@property (nonatomic, assign, readonly) NSUInteger pageCountUnfiltered; // ignores pageRange
+@property (nonatomic, assign, readonly) NSUInteger firstPageIndex;      // first page, 0 if pageRange is not set.
+
+/**
+ Limit pages to a certain page range.
+
+ If document has a pageRange set, the visible pages can be limited to a certain subset.
+ Defaults to nil.
+
+ @warning Changing this will require a reloadData on the PSPDFViewController.
+ */
+@property (nonatomic, copy) NSIndexSet *pageRange;
+
+/// Translates the capped page to the real page.
+/// Will only return something different if pageRange is set.
+- (NSUInteger)translateCappedPageToRealPage:(NSUInteger)page;
+
+/// Translates the real page to the capped page.
+/// Will only return something different if pageRange is set.
+- (NSUInteger)translateRealPageToCappedPage:(NSUInteger)page;
 
 /// Unlock the PDF with a password. Returns YES on success. (File operation, might block for a bit
 /// Will set .password to this password if successful.
@@ -104,7 +133,7 @@ extern NSString *PSPDFKCloseCachedDocumentRefNotification;
 
 /// Name of the encryption filter used, e.g. Adobe.APS. If this is set, the document can't be unlocked.
 /// See "Adobe LifeCycle DRM, http://www.adobe.com/products/livecycle/rightsmanagement
-@property (nonatomic, assign, readonly) NSString *encryptionFilter;
+@property (nonatomic, copy, readonly) NSString *encryptionFilter;
 
 /// Has the PDF file been unlocked? (is it still locked?).
 @property (nonatomic, assign, readonly) BOOL isLocked;
@@ -116,7 +145,7 @@ extern NSString *PSPDFKCloseCachedDocumentRefNotification;
 - (BOOL)saveChangedAnnotationsWithError:(NSError **)error;
 
 /// Access the PDF metadata. (might be a slow operation)
-@property (nonatomic, strong, readonly) NSDictionary *metadata;
+@property (nonatomic, copy, readonly) NSDictionary *metadata;
 
 /// Return YES if metadata is already parsed.
 @property (nonatomic, assign, readonly, getter=isMetadataLoaded) BOOL metadataLoaded;
@@ -164,5 +193,12 @@ extern NSString *PSPDFKCloseCachedDocumentRefNotification;
 @property (nonatomic, strong) NSData *data;
 
 @property (nonatomic, assign, readonly) BOOL hasOpenDocumentRef;
+
+/// Queries the PageInfo, but doesn't fetch new data.
+- (PSPDFPageInfo *)pageInfoForPageNoFetching:(NSUInteger)page;
+
+/// Cached rotation and aspect ratio data for specific page. Page starts at 0.
+/// You can override this if you need to manually change the rotation value of a page.
+- (PSPDFPageInfo *)pageInfoForPage:(NSUInteger)page pageRef:(CGPDFPageRef)pageRef;
 
 @end

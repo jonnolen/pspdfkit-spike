@@ -2,7 +2,7 @@
 //  PSPDFWebViewController.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //  Parts of this code is based on https://github.com/samvermette/SVWebViewController.
 //
 
@@ -10,12 +10,17 @@
 #import "PSPDFBaseViewController.h"
 #import "PSPDFStyleable.h"
 
-@class PSPDFViewController;
+@class PSPDFViewController, PSPDFAlertView;
 
 @protocol PSPDFWebViewControllerDelegate <NSObject>
 
 /// Controller where the webViewController has been pushed to (to dismiss modally)
 - (UIViewController *)masterViewController;
+
+@optional
+
+/// To handle external URLS.
+- (BOOL)handleExternalURL:(NSURL *)URL buttonCompletionBlock:(void (^)(PSPDFAlertView *alert, NSUInteger buttonIndex))completionBlock;
 
 @end 
 
@@ -56,7 +61,7 @@ typedef NS_ENUM(NSUInteger, PSPDFWebViewControllerAvailableActions) {
 @property (nonatomic, strong) UIPopoverController *popoverController;
 
 /// Associated delegate, connects to the PSPDFViewController
-@property (nonatomic, ps_weak) id<PSPDFWebViewControllerDelegate> delegate;
+@property (nonatomic, weak) id<PSPDFWebViewControllerDelegate> delegate;
 
 /// Defaults to YES. Will be checked in the default implementation of setActivityIndicatorEnabled.
 /// Set to NO to NOT change the global network activity indicator.
@@ -69,5 +74,13 @@ typedef NS_ENUM(NSUInteger, PSPDFWebViewControllerAvailableActions) {
 /// Override if you have your own network activity manager.
 /// Defaults to [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
 - (void)setActivityIndicatorEnabled:(BOOL)enabled;
+
+// Toolbar items
+- (void)goBack:(id)sender;
+- (void)goForward:(id)sender;
+- (void)reload:(id)sender;
+- (void)stop:(id)sender;
+- (void)action:(id)sender;
+- (void)doneButtonClicked:(id)sender;
 
 @end

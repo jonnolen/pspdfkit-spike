@@ -2,7 +2,7 @@
 //  PSPDFTextAnnotationController.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
@@ -12,6 +12,8 @@
 @class PSPDFGradientView, PSPDFAnnotation, PSPDFPageView, PSPDFNoteAnnotationController;
 
 @protocol PSPDFNoteAnnotationControllerDelegate <NSObject>
+
+@optional
 
 /// Called when the noteController has deleted the annotation.
 - (void)noteAnnotationController:(PSPDFNoteAnnotationController *)noteAnnotationController didDeleteAnnotation:(PSPDFAnnotation *)annotation;
@@ -25,24 +27,29 @@
 @end
 
 /// Note annotation controller for editing PSPDFAnnotations.
+/// For Note annotations, special options will be displayed.
 @interface PSPDFNoteAnnotationController : PSPDFBaseViewController <PSPDFStyleable>
 
 /// Designated initalizer.
-- (id)initWithAnnotation:(PSPDFAnnotation *)nnotation editable:(BOOL)allowEditing;
+- (id)initWithAnnotation:(PSPDFAnnotation *)annotation editable:(BOOL)allowEditing;
 
 /// Attached annotation.
 /// Allowed types are PSPDFNoteAnnotation, PSPDFHighlightAnnotation and PSPDFFreeTextAnnotation.
 @property (nonatomic, strong) PSPDFAnnotation *annotation;
 
-/// If NO, the Edit/Delete buttons are not displayed
+/// If NO, the Edit/Delete buttons are not displayed and the text will be readonly.
 @property (nonatomic, assign, readonly) BOOL allowEditing;
 
-/// Allow to customize the textView (font etc)
-/// Is created in init to be easily customizable
+/// If YES, the edit button will be displayed to show color/icon editing. Defaults to YES.
+/// Will be ignored if allowEditing is NO or annotation type is not PSPDFAnnotationTypeNote.
+@property (nonatomic, assign) BOOL showColorAndIconOptions;
+
+/// Allow to customize the textView. (font etc)
+/// Is created in init to be easily customizable.
 @property (nonatomic, strong, readonly) UITextView *textView;
 
 /// Attached delegate.
-@property (nonatomic, ps_weak) id<PSPDFNoteAnnotationControllerDelegate> delegate;
+@property (nonatomic, weak) id<PSPDFNoteAnnotationControllerDelegate> delegate;
 
 @end
 
@@ -51,6 +58,9 @@
 
 /// Called when we're about to show the annotation delete menu.
 - (void)deleteAnnotation:(UIBarButtonItem *)barButtonItem;
+
+/// Returns "Delete Note", "Delete Free Text", "Delete Highlight" etc.
+- (NSString *)deleteAnnotationActionTitle;
 
 @property (nonatomic, strong) PSPDFGradientView *backgroundView;
 @property (nonatomic, strong) UIView *optionsView;

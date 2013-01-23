@@ -2,21 +2,32 @@
 //  PSPDFGlyph.h
 //  PSPDFKit
 //
-//  Copyright 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFKitGlobal.h"
 
 @class PSPDFFontInfo;
 
-// Global helper to convert glyphs to rects.
+/// Global helper to convert glyphs to rects.
+/// 't' is the pageRotationTransform of PSPDFPageInfo.
+/// boundingBox will already be transformed with 't'.
 extern NSArray *PSPDFRectsFromGlyphs(NSArray *glyphs, CGAffineTransform t, CGRect *boundingBox);
+
+/// Returns the boundingBox that includes all glyphs.
+/// 't' is the pageRotationTransform of PSPDFPageInfo.
+extern CGRect PSPDFBoundingBoxFromGlyphs(NSArray *glyphs, CGAffineTransform t);
+
+/// Scans glyphs and reduces the selection to columns.
+extern NSArray *PSPDFReduceGlyphsToColumn(NSArray *glyphs);
 
 /// Represents a single character (glyph) on the pdf page.
 /// Adobe also might reference to this as "Quad".
-@interface PSPDFGlyph : NSObject
+@interface PSPDFGlyph : NSObject <NSCopying, NSCoding>
 
-/// Frame of the glyph.
+/// Frame of the glyph. Doesn't has pageRotation applied.
+/// To apply the pageRotation, use CGRectApplyAffineTransform(glyph.frame, pageView.pageInfo.pageRotationTransform)
+/// (PSPDFWord etc do have conveniece methods for this)
 @property (nonatomic, assign) CGRect frame;
 
 /// Character content (usually a single character)
@@ -42,5 +53,8 @@ extern NSArray *PSPDFRectsFromGlyphs(NSArray *glyphs, CGAffineTransform t, CGRec
 
 /// Used for caching during longPress event.
 @property (nonatomic, assign) CGRect cachedViewRect;
+
+/// Compare.
+- (BOOL)isEqualToGlyph:(PSPDFGlyph *)otherGlyph;
 
 @end

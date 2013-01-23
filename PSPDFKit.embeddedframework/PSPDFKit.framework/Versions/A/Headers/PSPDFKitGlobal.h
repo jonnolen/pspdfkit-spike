@@ -2,7 +2,7 @@
 //  PSPDFKitGlobal.h
 //  PSPDFKit
 //
-//  Copyright 2011-2012 Peter Steinberger. All rights reserved.
+//  Copyright 2011-2013 Peter Steinberger. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -14,28 +14,29 @@
 /// *Completely* disables logging. not advised to change this, use kPSPDFLogLevel instead.
 #define kPSPDFKitDebugEnabled
 
-// Newer runtimes defines this, here's a fallback for the iOS5 SDK.
-#ifndef NS_ENUM
-#define NS_ENUM(_type, _name) _type _name; enum
-#define NS_OPTIONS(_type, _name) _type _name; enum
-#endif
+// Debug feature
+//#define kPSPDFEnableAllBarButtonItems
 
 extern NSString *const kPSPDFErrorDomain;
 
 typedef NS_ENUM(NSInteger, PSPDFErrorCode) {
     PSPDFErrorCodePageInvalid = 100,
     PSPDFErrorCodeUnableToOpenPDF = 200,
+    PSPDFErrorCodeUnableToGetPageReference = 210,
     PSPDFErrorCodeDocumentLocked = 300,
     PSPDFErrorCodeFailedToLoadAnnotations = 400,
     PSPDFErrorCodeFailedToWriteAnnotations = 410,
+    PSPDFErrorCodeFailedToLoadBookmarks = 450,
     PSPDFErrorCodeOutlineParser = 500,
     PSPDFErrorCodeUnableToConvertToDataRepresentation = 600,
     PSPDFErrorCodeRemoveCacheError = 700,
     PSPDFErrorCodeFailedToConvertToPDF = 800,
+    PSPDFErrorCodeFailedToGeneratePDFInvalidArguments = 810,
+    PSPDFErrorCodeFailedToGeneratePDFDocumentInvalid = 820,
     PSPDFErrorCodeUnknown = 900,
 };
 
-/// Log level defines.
+/// Global PSPDFKit log level.
 /// Note that PSPDFLogLevelVerbose will severly slow down the whole application.
 /// (e.g. Some lazy evaluated properties will be evaluated on the main thread)
 typedef NS_ENUM(NSInteger, PSPDFLogLevel) {
@@ -111,6 +112,9 @@ extern NSString *PSPDFStripPDFFileType(NSString *pdfFileName);
 /// Queries subviews for a specific class prefix. Usually used for subview-querying.
 extern UIView *PSPDFGetViewInsideView(UIView *view, NSString *classNamePrefix);
 
+// In order for pspdf_dispatch_sync_reentrant to work, you need to create your queues with this helper.
+extern inline dispatch_queue_t pspdf_dispatch_queue_create(const char *label, dispatch_queue_attr_t attr);
+
 // Helper for deadlock-free dispatch_sync.
 extern inline void pspdf_dispatch_sync_reentrant(dispatch_queue_t queue, dispatch_block_t block);
 
@@ -141,7 +145,7 @@ extern CGFloat psrangef(float minRange, float value, float maxRange);
 extern NSString *PSPDFTrimString(NSString *string);
 
 // Checks if the current controller class is displayed in the popover (also checks UINavigationController)
-extern BOOL PSPDFIsControllerClassInPopover(UIPopoverController *popoverController, Class controllerClass);
+extern BOOL PSPDFIsControllerClassInPopoverAndVisible(UIPopoverController *popoverController, Class controllerClass);
 
 // Convert an NSArray of NSNumber's to an NSIndexSet
 extern NSIndexSet *PSPDFIndexSetFromArray(NSArray *array);
@@ -160,31 +164,30 @@ extern void PSPDFLockRotation(void);
 extern void PSPDFUnlockRotation(void);
 
 // Returns a unique temporary file URL.
-extern NSURL *PSPDFTempFileURL(NSString *prefix);
+extern NSURL *PSPDFTempFileURLWithPathExtension(NSString *prefix, NSString *pathExtension);
 
-// Use special weak keyword
-#if !defined ps_weak && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 && !defined (PSPDF_ARC_IOS5_COMPILE)
-#define ps_weak weak
-#define __ps_weak __weak
-#elif !defined ps_weak
-#define ps_weak unsafe_unretained
-#define __ps_weak __unsafe_unretained
-#endif
+// Returns whether both objects are identical or equal via -isEqual.
+BOOL PSPDFEqualObjects(id obj1, id obj2);
 
-#define PSRectClearCoords(_CGRECT) CGRectMake(0, 0, _CGRECT.size.width, _CGRECT.size.height)
 #define PSIsIpad() ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
 #define ps_swapf(a,b) { float c = (a); (a) = (b); (b) = c; }
 #define BOXED(val) ({ typeof(val) _tmp_val = (val); [NSValue valueWithBytes:&(_tmp_val) objCType:@encode(typeof(val))]; })
 
+// Compiler-checked selectors
 #define PSPDF_KEYPATH(object, property) ((void)(NO && ((void)object.property, NO)), @#property)
 #define PSPDF_KEYPATH_SELF(property) PSPDF_KEYPATH(self, property)
+#if DEBUG
+#define PROPERTY(propName) NSStringFromSelector(@selector(propName))
+#else
+#define PROPERTY(propName) @#propName
+#endif
 
 // Log helper
 #ifdef kPSPDFKitDebugEnabled
-#define PSPDFLogVerbose(fmt, ...) do { if(kPSPDFLogLevel >= PSPDFLogLevelVerbose) NSLog((@"%s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
-#define PSPDFLog(fmt, ...) do { if(kPSPDFLogLevel >= PSPDFLogLevelInfo) NSLog((@"%s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
-#define PSPDFLogWarning(fmt, ...) do { if(kPSPDFLogLevel >= PSPDFLogLevelWarning) NSLog((@"Warning: %s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
-#define PSPDFLogError(fmt, ...) do { if(kPSPDFLogLevel >= PSPDFLogLevelError) NSLog((@"Error: %s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
+#define PSPDFLogVerbose(fmt, ...) do { if (kPSPDFLogLevel >= PSPDFLogLevelVerbose) NSLog((@"%s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
+#define PSPDFLog(fmt, ...) do { if (kPSPDFLogLevel >= PSPDFLogLevelInfo) NSLog((@"%s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
+#define PSPDFLogWarning(fmt, ...) do { if (kPSPDFLogLevel >= PSPDFLogLevelWarning) NSLog((@"Warning: %s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
+#define PSPDFLogError(fmt, ...) do { if (kPSPDFLogLevel >= PSPDFLogLevelError) NSLog((@"Error: %s/%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
 #else
 #define PSPDFLogVerbose(...)
 #define PSPDFLog(...)
@@ -193,19 +196,6 @@ extern NSURL *PSPDFTempFileURL(NSString *prefix);
 #endif
 
 // iOS compatibility
-#ifndef kCFCoreFoundationVersionNumber_iOS_5_0
-#define kCFCoreFoundationVersionNumber_iOS_5_0 674.0
-#endif
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 50000
-#define PSPDF_IF_IOS5_OR_GREATER(...) \
-if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_5_0) { __VA_ARGS__ }
-#else
-#define PSPDF_IF_IOS5_OR_GREATER(...)
-#endif
-
-#define PSPDF_IF_PRE_IOS5(...)  \
-if (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_5_0) { __VA_ARGS__ }
-
 #ifndef kCFCoreFoundationVersionNumber_iOS_6_0
 #define kCFCoreFoundationVersionNumber_iOS_6_0 788.0
 #endif
@@ -229,19 +219,22 @@ if (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_6_0 || _
 #define PSPDF_IF_NOT_SIMULATOR(...) { __VA_ARGS__ }
 #endif
 
-// micro optimizations
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-
-// Starting with iOS6, dispatch queue's are objects and managed via ARC.
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000
+// Starting with iOS6, dispatch queue's can be objects and managed via ARC.
+#if OS_OBJECT_USE_OBJC
 #define PSPDFDispatchRelease(queue)
 #else
 #define PSPDFDispatchRelease(queue) dispatch_release(queue)
 #endif
 
-@interface NSArray (PSPDFArrayAccess)
+@interface NSArray (PSPDFCollections)
 - (id)ps_firstObject;
+@end
+@interface NSMutableArray (PSPDFCollections)
+- (void)ps_addObjectSafe:(id)anObject;
+- (void)ps_addObjectsFromArraySafe:(NSArray *)otherArray;
+@end
+@interface NSMutableDictionary (PSPDFCollections)
+- (void)ps_setObjectSafe:(id)anObject forKey:(id<NSCopying>)aKey;
 @end
 
 // Smart little helper to find main thread hangs. Enable in appDidFinishLaunching.
@@ -253,20 +246,3 @@ if (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_6_0 || _
 // Force a category to be loaded when an app starts up, see http://developer.apple.com/library/mac/#qa/qa2006/qa1490.html
 #define PSPDF_FIX_CATEGORY_BUG(name) @interface PSPDF_FIX_CATEGORY_BUG_##name @end \
 @implementation PSPDF_FIX_CATEGORY_BUG_##name @end
-
-// Add support for subscripting to the iOS 5 SDK.
-// See http://petersteinberger.com/blog/2012/using-subscripting-with-Xcode-4_4-and-iOS-4_3
-#if __IPHONE_OS_VERSION_MAX_ALLOWED < 60000
-@interface NSDictionary(PSPDFSubscriptingSupport)
-- (id)objectForKeyedSubscript:(id)key;
-@end
-@interface NSMutableDictionary(PSPDFSubscriptingSupport)
-- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key;
-@end
-@interface NSArray(PSPDFSubscriptingSupport)
-- (id)objectAtIndexedSubscript:(NSUInteger)idx;
-@end
-@interface NSMutableArray(PSPDFSubscriptingSupport)
-- (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx;
-@end
-#endif

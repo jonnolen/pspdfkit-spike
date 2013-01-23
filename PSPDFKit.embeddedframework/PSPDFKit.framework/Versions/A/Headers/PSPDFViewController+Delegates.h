@@ -2,13 +2,13 @@
 //  PSPDFViewController+Delegates.h
 //  PSPDFKit
 //
-//  Copyright (c) 2012 Peter Steinberger. All rights reserved.
+//  Copyright (c) 2012-2013 Peter Steinberger. All rights reserved.
 //
 
 #import "PSPDFViewController.h"
 
 @protocol PSPDFAnnotationView;
-@class PSPDFPageView, PSPDFAnnotation, PSPDFPageCoordinates, PSPDFPageInfo;
+@class PSPDFPageView, PSPDFAnnotation, PSPDFPageCoordinates, PSPDFPageInfo, PSPDFImageInfo;
 
 @interface PSPDFViewController (Delegates)
 
@@ -16,7 +16,7 @@
 - (void)delegateWillDisplayDocument;
 - (void)delegateDidDisplayDocument;
 
-- (void)delegateDidShowPage:(NSUInteger)realPage; // legacy bridge
+- (void)delegateDidShowPage:(NSUInteger)page; // legacy bridge
 - (void)delegateDidShowPageView:(PSPDFPageView *)pageView;
 - (void)delegateDidRenderPageView:(PSPDFPageView *)pageView;
 - (void)delegateDidChangeViewMode:(PSPDFViewMode)viewMode;
@@ -30,6 +30,7 @@
 - (void)delegateDidSelectText:(NSString *)text withGlyphs:(NSArray *)glyphs atRect:(CGRect)rect onPageView:(PSPDFPageView *)pageView;
 
 - (NSArray *)delegateShouldShowMenuItems:(NSArray *)menuItems atSuggestedTargetRect:(CGRect)rect forSelectedText:(NSString *)selectedText inRect:(CGRect)textRect onPageView:(PSPDFPageView *)pageView;
+- (NSArray *)delegateShouldShowMenuItems:(NSArray *)menuItems atSuggestedTargetRect:(CGRect)rect forSelectedImage:(PSPDFImageInfo *)selectedImage inRect:(CGRect)textRect onPageView:(PSPDFPageView *)pageView;
 
 // annotations
 - (BOOL)delegateDidTapOnAnnotation:(PSPDFAnnotation *)annotation annotationPoint:(CGPoint)annotationPoint annotationView:(UIView<PSPDFAnnotationView> *)annotationView pageView:(PSPDFPageView *)pageView viewPoint:(CGPoint)viewPoint;
@@ -71,6 +72,7 @@ typedef struct {
     unsigned int delegateShouldSelectText:1;
     unsigned int delegateDidSelectText:1;
     unsigned int delegateShouldShowMenuItemsForSelectedText:1;
+    unsigned int delegateShouldShowMenuItemsForSelectedImage:1;
     unsigned int delegateShouldSelectAnnotation:1;
     unsigned int delegateDidSelectAnnotation:1;
     unsigned int delegateShouldShowMenuItemsForAnnotation:1;
