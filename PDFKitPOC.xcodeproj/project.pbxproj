@@ -14,7 +14,6 @@
 		FC1EE47616AEC7D5007A39FC /* PSPDFKit.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC1EE47016AEC7D5007A39FC /* PSPDFKit.xcconfig */; };
 		FC1EE47716AEC7D5007A39FC /* VERSION in Resources */ = {isa = PBXBuildFile; fileRef = FC1EE47116AEC7D5007A39FC /* VERSION */; };
 		FC1EE47916AEC855007A39FC /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC1EE47816AEC855007A39FC /* AssetsLibrary.framework */; };
-		FC1EE4BF16B071D1007A39FC /* DTAnnotationProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = FC1EE4BE16B071D1007A39FC /* DTAnnotationProvider.m */; };
 		FC29959A16ADAE5200FDAF18 /* DTPDFToolBar.m in Sources */ = {isa = PBXBuildFile; fileRef = FC29959916ADAE5200FDAF18 /* DTPDFToolBar.m */; };
 		FC29959D16ADBAAF00FDAF18 /* 39-spraycan@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FC29959C16ADBAAF00FDAF18 /* 39-spraycan@2x.png */; };
 		FC29959F16ADBAE000FDAF18 /* 39-spraycan_white@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FC29959E16ADBAE000FDAF18 /* 39-spraycan_white@2x.png */; };
@@ -67,8 +66,6 @@
 		FC1EE47016AEC7D5007A39FC /* PSPDFKit.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = PSPDFKit.xcconfig; sourceTree = "<group>"; };
 		FC1EE47116AEC7D5007A39FC /* VERSION */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VERSION; sourceTree = "<group>"; };
 		FC1EE47816AEC855007A39FC /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
-		FC1EE4BD16B071D1007A39FC /* DTAnnotationProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTAnnotationProvider.h; sourceTree = "<group>"; };
-		FC1EE4BE16B071D1007A39FC /* DTAnnotationProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DTAnnotationProvider.m; sourceTree = "<group>"; };
 		FC29959816ADAE5200FDAF18 /* DTPDFToolBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTPDFToolBar.h; sourceTree = "<group>"; };
 		FC29959916ADAE5200FDAF18 /* DTPDFToolBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DTPDFToolBar.m; sourceTree = "<group>"; };
 		FC29959C16ADBAAF00FDAF18 /* 39-spraycan@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "39-spraycan@2x.png"; sourceTree = "<group>"; };
@@ -217,8 +214,6 @@
 				FC95502C1635D136005CBE8F /* Supporting Files */,
 				FC29959816ADAE5200FDAF18 /* DTPDFToolBar.h */,
 				FC29959916ADAE5200FDAF18 /* DTPDFToolBar.m */,
-				FC1EE4BD16B071D1007A39FC /* DTAnnotationProvider.h */,
-				FC1EE4BE16B071D1007A39FC /* DTAnnotationProvider.m */,
 			);
 			path = PDFKitPOC;
 			sourceTree = "<group>";
@@ -398,7 +393,6 @@
 				FC9550361635D136005CBE8F /* DTAppDelegate.m in Sources */,
 				FC9550421635D136005CBE8F /* DTViewController.m in Sources */,
 				FC29959A16ADAE5200FDAF18 /* DTPDFToolBar.m in Sources */,
-				FC1EE4BF16B071D1007A39FC /* DTAnnotationProvider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

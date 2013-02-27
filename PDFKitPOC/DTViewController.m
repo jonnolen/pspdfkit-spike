@@ -136,6 +136,14 @@
 }
 -(void)saveAnnotations:(id)sender{
     NSAssert([self.pdfController.document saveChangedAnnotationsWithError:nil],@"save failed.");
+
+    for (int page = 0; page < self.pdfController.document.pageCount; page++)
+    {
+        NSArray * annotationsForPage = [self.pdfController.document.annotationParser annotationsForPage:page type:PSPDFAnnotationTypeHighlight];
+        [annotationsForPage enumerateObjectsUsingBlock:^(PSPDFAnnotation *annotation, NSUInteger idx, BOOL *innerStop){
+            NSLog(@"page %d annotation %d: %@", page, idx, [annotation externalRepresentationInFormat:PSPDFModelJSONFormat]);
+        }];
+    }
 }
 
 +(NSString *)Documents{
