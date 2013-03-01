@@ -9,11 +9,12 @@
 #import "DTViewController.h"
 #import <PSPDFKit/PSPDFKit.h>
 #import "DTPDFToolBar.h"
+#import "DTAnnotationProvider.h"
 
 @interface DTViewController ()<PSPDFViewControllerDelegate>
 @property (nonatomic, strong) PSPDFViewController *pdfController;
 @property (nonatomic, strong) IBOutlet DTPDFToolbar *toolbar;
-
+@property (nonatomic, strong) DTAnnotationProvider *customAnnotationProvider;
 @end
 
 @implementation DTViewController
@@ -29,13 +30,14 @@
     // Do any additional setup after loading the view, typically from a nib.
     NSURL *documentURL = [[[NSBundle mainBundle] resourceURL] URLByAppendingPathComponent:@"pdf-iso3200.pdf"];
     PSPDFDocument *doc = [PSPDFDocument PDFDocumentWithURL:documentURL];
+
+    self.customAnnotationProvider = [DTAnnotationProvider new];
+    
     [doc setDidCreateDocumentProviderBlock:^(PSPDFDocumentProvider *docProvider){
         NSLog(@"DID CREATE DOC PROVIDER: %@",docProvider.fileURL);
-        docProvider.annotationParser.fileAnnotationProvider.annotationsPath = [[DTViewController Documents] stringByAppendingPathComponent:@"annotations_mf.kit"];
-        docProvider.annotationParser.annotationProviders = @[docProvider.annotationParser.fileAnnotationProvider];
-        [docProvider.annotationParser.fileAnnotationProvider tryLoadAnnotationsFromFileWithError:nil];
+
+        docProvider.annotationParser.annotationProviders = @[self.customAnnotationProvider, docProvider.annotationParser.fileAnnotationProvider];
     }];
-    doc.annotationSaveMode = PSPDFAnnotationSaveModeExternalFile;
     return [[PSPDFViewController alloc] initWithDocument:doc];
 }
 -(void)configureToolbar{
@@ -55,10 +57,10 @@
     [pause setTitle:@"debug!" forState:UIControlStateNormal];
     [self.toolbar addSubview:pause];
     
-    UIButton *save = [[UIButton alloc] initWithFrame:CGRectOffset(pause.frame, -100, 0)];
-    [save addTarget:self action:@selector(saveAnnotations:) forControlEvents:UIControlEventTouchUpInside];
-    [save setTitle:@"save!" forState:UIControlStateNormal];
-    [self.toolbar addSubview:save];
+    UIButton *print = [[UIButton alloc] initWithFrame:CGRectOffset(pause.frame, -100, 0)];
+    [print addTarget:self action:@selector(printAnnotationsForCurrentPage:) forControlEvents:UIControlEventTouchUpInside];
+    [print setTitle:@"print!" forState:UIControlStateNormal];
+    [self.toolbar addSubview:print];
     
     [self.pdfController.HUDView addSubview:self.toolbar];
 }
@@ -132,18 +134,32 @@
 }
 
 -(void)pauseToDebug:(id)sender{
-    NSLog(@"Breakin' 2: Electric Bugaloo");
-}
--(void)saveAnnotations:(id)sender{
-    NSAssert([self.pdfController.document saveChangedAnnotationsWithError:nil],@"save failed.");
 
-    for (int page = 0; page < self.pdfController.document.pageCount; page++)
-    {
-        NSArray * annotationsForPage = [self.pdfController.document.annotationParser annotationsForPage:page type:PSPDFAnnotationTypeHighlight];
-        [annotationsForPage enumerateObjectsUsingBlock:^(PSPDFAnnotation *annotation, NSUInteger idx, BOOL *innerStop){
-            NSLog(@"page %d annotation %d: %@", page, idx, [annotation externalRepresentationInFormat:PSPDFModelJSONFormat]);
-        }];
-    }
+}
+-(void)printAnnotationsForCurrentPage:(id)sender{
+
+    NSArray *currentCustomAnnotations = [self.customAnnotationProvider annotationsForPage:self.pdfController.page];
+    NSArray *currentFileProviderAnnotations = [self.pdfController.document.annotationParser.fileAnnotationProvider annotationsForPage:self.pdfController.page];
+    
+    NSLog(@"Custom Annotations For Current Page: %d\nFile Annotation Provider Annotations For Current Page: %d", currentCustomAnnotations.count, currentFileProviderAnnotations.count);
+    
+    
+    void(^annotationEnumeratorBlock)(PSPDFAnnotation *annotation, NSUInteger idx, BOOL *stop) = ^(PSPDFAnnotation *annotation, NSUInteger idx, BOOL *stop){
+        id representation = [annotation externalRepresentationInFormat:PSPDFModelJSONFormat];
+        
+        NSLog(@"%@ - %@", [representation class], representation);
+    };
+    
+    NSLog(@"custom annotations");
+    [currentCustomAnnotations enumerateObjectsUsingBlock:annotationEnumeratorBlock];
+    
+    NSLog(@"file provider annotations");
+    [currentFileProviderAnnotations enumerateObjectsUsingBlock:annotationEnumeratorBlock];
+}
+
+-(void)loadAnnotations:(id)sender{
+    NSLog(@"loading annotations.");
+    [self.pdfController.document.annotationParser.fileAnnotationProvider tryLoadAnnotationsFromFileWithError:nil];
 }
 
 +(NSString *)Documents{
